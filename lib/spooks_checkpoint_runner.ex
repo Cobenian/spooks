@@ -10,6 +10,7 @@ defmodule Spooks.SpooksCheckpointRunner do
 
   alias Spooks.WorkflowEngine
   alias Spooks.Schema.WorkflowCheckpoint
+  alias Spooks.Checkpoint.SpookCheckpoints
 
   @doc """
   Starts the SpooksCheckpointRunner task with the provided options. This task should be run on each node.
@@ -44,7 +45,8 @@ defmodule Spooks.SpooksCheckpointRunner do
     get_timed_out_checkpoints(repo, checkpoint_timeout)
     |> Enum.map(fn checkpoint ->
       try do
-        WorkflowEngine.run_step(checkpoint.workflow_context, checkpoint.workflow_event)
+        event = SpookCheckpoints.get_checkpoint_event(checkpoint)
+        WorkflowEngine.run_step(checkpoint.workflow_context, event)
       rescue
         e ->
           Logger.error("Error running checkpoint: #{checkpoint.id} with error: #{inspect(e)}")

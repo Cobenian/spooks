@@ -18,6 +18,7 @@ defmodule MyApp.Repo.Migrations.AddSpooksTables do
       add :workflow_identifier, :string
       add :workflow_module, :string
       add :workflow_context, :map
+      add :workflow_event_module, :string
       add :workflow_event, :map
       add :checkpoint_timeout, :naive_datetime
 

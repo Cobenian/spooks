@@ -1,5 +1,11 @@
-defmodule Spooks.Schema.SpookCheckpoints do
+defmodule Spooks.Checkpoint.SpookCheckpoints do
   alias Spooks.Schema.WorkflowCheckpoint
+
+  def get_checkpoint_event(checkpoint) do
+    event_module = checkpoint.workflow_event_module
+    event_data = checkpoint.workflow_event
+    struct(event_module, event_data)
+  end
 
   @doc """
   Gets the checkpoint for the given context. Returns nil if there is no checkpoint.
@@ -62,6 +68,7 @@ defmodule Spooks.Schema.SpookCheckpoints do
               "workflow_identifier" => workflow_context.workflow_identifier,
               "workflow_module" => Atom.to_string(workflow_context.workflow_module),
               "workflow_context" => workflow_context,
+              "workflow_event_module" => Atom.to_string(event.__struct__),
               "workflow_event" => event,
               "checkpoint_timeout" =>
                 NaiveDateTime.add(NaiveDateTime.utc_now(), timeout_in_minutes, :minute)
@@ -72,6 +79,7 @@ defmodule Spooks.Schema.SpookCheckpoints do
             checkpoint
             |> WorkflowCheckpoint.update_changeset(%{
               "workflow_context" => workflow_context,
+              "workflow_event_module" => Atom.to_string(event.__struct__),
               "workflow_event" => event
             })
             |> repo.update()

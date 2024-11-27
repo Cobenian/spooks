@@ -6,6 +6,7 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
     field(:workflow_identifier, :string)
     field(:workflow_module, :string)
     field(:workflow_context, :map)
+    field(:workflow_event_module, :string)
     field(:workflow_event, :map)
     field(:checkpoint_timeout, :naive_datetime)
 
@@ -18,6 +19,7 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
       :workflow_identifier,
       :workflow_module,
       :workflow_context,
+      :workflow_event_module,
       :workflow_event,
       :checkpoint_timeout
     ])
@@ -25,6 +27,7 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
       :workflow_identifier,
       :workflow_module,
       :workflow_context,
+      :event_module,
       :workflow_event,
       :checkpoint_timeout
     ])
@@ -34,10 +37,12 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
     workflow_checkpoint
     |> cast(attrs, [
       :workflow_context,
+      :event_module,
       :workflow_event
     ])
     |> validate_required([
       :workflow_context,
+      :event_module,
       :workflow_event
     ])
   end

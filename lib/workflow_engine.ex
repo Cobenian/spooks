@@ -17,7 +17,7 @@ defmodule Spooks.WorkflowEngine do
   alias Spooks.Context.SpooksContext
   alias Spooks.Event.StartEvent
 
-  import Spooks.Schema.SpookCheckpoints
+  alias Spooks.Checkpoint.SpookCheckpoints
 
   require Logger
 
@@ -41,7 +41,7 @@ defmodule Spooks.WorkflowEngine do
       "running workflow: #{workflow_context.workflow_module} with identifier: #{workflow_context.workflow_identifier}"
     )
 
-    if has_checkpoint?(workflow_context) do
+    if SpookCheckpoints.has_checkpoint?(workflow_context) do
       resume_workflow(workflow_context)
     else
       start_workflow(workflow_context)
@@ -69,10 +69,11 @@ defmodule Spooks.WorkflowEngine do
           raise "Cannot resume workflow without a repo"
 
         _repo ->
-          get_checkpoint(workflow_context)
+          SpookCheckpoints.get_checkpoint(workflow_context)
       end
 
-    run_step(checkpoint.workflow_context, checkpoint.workflow_event)
+    event = SpookCheckpoints.get_checkpoint_event(checkpoint)
+    run_step(checkpoint.workflow_context, event)
   end
 
   @doc """
@@ -101,12 +102,12 @@ defmodule Spooks.WorkflowEngine do
       apply(workflow_module, step_name, [event, workflow_context])
       |> case do
         {:ok, ctx, nil} ->
-          remove_checkpoint(ctx)
+          SpookCheckpoints.remove_checkpoint(ctx)
           Logger.info("Workflow complete!")
           ctx
 
         {:ok, ctx, event} ->
-          save_checkpoint(ctx, event)
+          SpookCheckpoints.save_checkpoint(ctx, event)
           run_step(ctx, event)
       end
     else

@@ -46,7 +46,8 @@ defmodule Spooks.SpooksCheckpointRunner do
     |> Enum.map(fn checkpoint ->
       try do
         event = SpookCheckpoints.get_checkpoint_event(checkpoint)
-        WorkflowEngine.run_step(checkpoint.workflow_context, event)
+        workflow_context = SpookCheckpoints.get_workflow_context(checkpoint)
+        WorkflowEngine.run_step(workflow_context, event)
       rescue
         e ->
           Logger.error("Error running checkpoint: #{checkpoint.id} with error: #{inspect(e)}")

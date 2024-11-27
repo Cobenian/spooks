@@ -1,10 +1,22 @@
 defmodule Spooks.Checkpoint.SpookCheckpoints do
   alias Spooks.Schema.WorkflowCheckpoint
 
+  @doc """
+  After retrieving a checkpoint from the database we must convert its data back into a struct.
+  """
   def get_checkpoint_event(checkpoint) do
     event_module = checkpoint.workflow_event_module
     event_data = checkpoint.workflow_event
     struct(event_module, event_data)
+  end
+
+  @doc """
+  After retrieving a checkpoint from the database we must convert its data back into a struct.
+  """
+  def get_workflow_context(checkpoint) do
+    context_module = Spooks.Context.SpooksContext
+    context_data = checkpoint.workflow_context
+    struct(context_module, context_data)
   end
 
   @doc """

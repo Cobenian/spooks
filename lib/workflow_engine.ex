@@ -73,7 +73,8 @@ defmodule Spooks.WorkflowEngine do
       end
 
     event = SpookCheckpoints.get_checkpoint_event(checkpoint)
-    run_step(checkpoint.workflow_context, event)
+    workflow_context = SpookCheckpoints.get_workflow_context(checkpoint)
+    run_step(workflow_context, event)
   end
 
   @doc """

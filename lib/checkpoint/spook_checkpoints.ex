@@ -1,10 +1,11 @@
 defmodule Spooks.Checkpoint.SpookCheckpoints do
   alias Spooks.Schema.WorkflowCheckpoint
+  alias Spooks.Context.SpooksContext
 
   @doc """
   After retrieving a checkpoint from the database we must convert its data back into a struct.
   """
-  def get_checkpoint_event(checkpoint) do
+  def get_checkpoint_event(%WorkflowCheckpoint{} = checkpoint) do
     event_module = checkpoint.workflow_event_module
     event_data = checkpoint.workflow_event
     struct(event_module, event_data)
@@ -13,7 +14,7 @@ defmodule Spooks.Checkpoint.SpookCheckpoints do
   @doc """
   After retrieving a checkpoint from the database we must convert its data back into a struct.
   """
-  def get_workflow_context(checkpoint) do
+  def get_workflow_context(%WorkflowCheckpoint{} = checkpoint) do
     context_module = Spooks.Context.SpooksContext
     context_data = checkpoint.workflow_context
     struct(context_module, context_data)
@@ -22,7 +23,7 @@ defmodule Spooks.Checkpoint.SpookCheckpoints do
   @doc """
   Gets the checkpoint for the given context. Returns nil if there is no checkpoint.
   """
-  def get_checkpoint(workflow_context) do
+  def get_checkpoint(%SpooksContext{} = workflow_context) do
     case workflow_context.repo do
       nil ->
         nil
@@ -35,21 +36,21 @@ defmodule Spooks.Checkpoint.SpookCheckpoints do
   @doc """
   Checks if there is a checkpoint for the given context.
   """
-  def has_checkpoint?(workflow_context) do
+  def has_checkpoint?(%SpooksContext{} = workflow_context) do
     get_checkpoint(workflow_context) != nil
   end
 
   @doc """
   Removes the checkpoint for the given context.
   """
-  def remove_checkpoint(workflow_context) do
+  def remove_checkpoint(%SpooksContext{} = workflow_context) do
     workflow_context
     |> get_checkpoint()
     |> case do
       nil ->
         {:ok, nil}
 
-      checkpoint ->
+      %WorkflowCheckpoint{} = checkpoint ->
         case workflow_context.repo do
           nil ->
             {:ok, nil}
@@ -63,7 +64,7 @@ defmodule Spooks.Checkpoint.SpookCheckpoints do
   @doc """
   Saves a checkpoint for the given context and event.
   """
-  def save_checkpoint(workflow_context, event) do
+  def save_checkpoint(%SpooksContext{} = workflow_context, event) do
     case workflow_context.repo do
       nil ->
         {:ok, nil}

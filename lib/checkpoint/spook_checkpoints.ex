@@ -55,12 +55,16 @@ defmodule Spooks.Schema.SpookCheckpoints do
         |> get_checkpoint()
         |> case do
           nil ->
+            timeout_in_minutes = workflow_context.checkpoint_timeout_in_minutes || 60 * 48
+
             %WorkflowCheckpoint{}
             |> WorkflowCheckpoint.create_changeset(%{
               "workflow_identifier" => workflow_context.workflow_identifier,
               "workflow_module" => Atom.to_string(workflow_context.workflow_module),
               "workflow_context" => workflow_context,
-              "workflow_event" => event
+              "workflow_event" => event,
+              "checkpoint_timeout" =>
+                NaiveDateTime.add(NaiveDateTime.utc_now(), timeout_in_minutes, :minute)
             })
             |> repo.insert()
 

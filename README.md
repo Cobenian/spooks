@@ -5,6 +5,31 @@ An agentic workflow framework in Elixir
 
 You must run an ecto migration to create the `spooks_workflow_checkpoints` table if you plan on using checkpoints.
 
+```elixir
+defmodule MyApp.Repo.Migrations.AddSpooksTables do
+  use Ecto.Migration
+
+  def down do
+    drop table("spooks_workflow_checkpoints")
+  end
+
+  def up do
+    create table("spooks_workflow_checkpoints") do
+      add :workflow_identifier, :string
+      add :workflow_module, :string
+      add :workflow_context, :map
+      add :workflow_event, :map
+      add :checkpoint_timeout, :naive_datetime
+
+      timestamps()
+    end
+
+    create unique_index("spooks_workflow_checkpoints", [:workflow_identifier])
+  end
+end
+
+```
+
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `spooks` to your list of dependencies in `mix.exs`:
 

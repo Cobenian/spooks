@@ -7,6 +7,7 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
     field(:workflow_module, :string)
     field(:workflow_context, :map)
     field(:workflow_event, :map)
+    field(:checkpoint_timeout, :naive_datetime)
 
     timestamps()
   end
@@ -17,13 +18,15 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
       :workflow_identifier,
       :workflow_module,
       :workflow_context,
-      :workflow_event
+      :workflow_event,
+      :checkpoint_timeout
     ])
     |> validate_required([
       :workflow_identifier,
       :workflow_module,
       :workflow_context,
-      :workflow_event
+      :workflow_event,
+      :checkpoint_timeout
     ])
   end
 

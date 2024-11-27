@@ -27,7 +27,7 @@ defmodule Spooks.Context.SpooksContext do
   end
 
   def put_data(%__MODULE__{} = context, key, value) do
-    put_data(context.assigns, [key], value)
+    put_data(context, [key], value)
   end
 
   @doc """
@@ -38,6 +38,6 @@ defmodule Spooks.Context.SpooksContext do
   end
 
   def get_data(%__MODULE__{} = context, key) do
-    get_data(context.assigns, [key])
+    get_data(context, [key])
   end
 end

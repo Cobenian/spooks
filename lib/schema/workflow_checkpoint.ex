@@ -27,7 +27,7 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
       :workflow_identifier,
       :workflow_module,
       :workflow_context,
-      :event_module,
+      :workflow_event_module,
       :workflow_event,
       :checkpoint_timeout
     ])
@@ -37,12 +37,12 @@ defmodule Spooks.Schema.WorkflowCheckpoint do
     workflow_checkpoint
     |> cast(attrs, [
       :workflow_context,
-      :event_module,
+      :workflow_event_module,
       :workflow_event
     ])
     |> validate_required([
       :workflow_context,
-      :event_module,
+      :workflow_event_module,
       :workflow_event
     ])
   end

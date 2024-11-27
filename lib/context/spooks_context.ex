@@ -23,7 +23,7 @@ defmodule Spooks.Context.SpooksContext do
   Function for putting your custom data into the context.
   """
   def put_data(%__MODULE__{} = context, keys, value) when is_list(keys) do
-    put_in(context.assigns, keys, value)
+    put_in(context, [Access.key(:assigns)] ++ keys, value)
   end
 
   def put_data(%__MODULE__{} = context, key, value) do
@@ -34,7 +34,7 @@ defmodule Spooks.Context.SpooksContext do
   Function for getting your custom data from the context.
   """
   def get_data(%__MODULE__{} = context, keys) when is_list(keys) do
-    get_in(context.assigns, keys)
+    get_in(context, [Access.key(:assigns)] ++ keys)
   end
 
   def get_data(%__MODULE__{} = context, key) do

@@ -55,8 +55,12 @@ use Spooks.Workflow
 
 Create a struct for each event in your workflow. You can add whichever fields you like to your struct.
 
+> [!NOTE]
+> Note that all your events must `@derive Jason.Encoder` because they are saved to the database checkpoints.
+
 ```elixir
 defmodule MyApp.MyCustomEvent do
+  @derive Jason.Encoder
   defstruct []
 end
 ```
@@ -92,7 +96,7 @@ def my_first_step(event, ctx) do
 end
 
 @step %Step{in: MySecondEvent, out: [MyThirdEvent,StopEvent]}
-def my_first_step(event, ctx) do
+def my_second_step(event, ctx) do
   ...
 end
 
@@ -103,6 +107,26 @@ end
 ```
 
 There are two built in events for `Spooks.Event.StartEvent` and `Spooks.Event.EndEvent`.
+
+If you would like to add data or get data from the context you should use the following functions:
+
+> [!HINT]
+> You can also use a list of keys for `put_data` and `get_data` for nested data structures.
+
+```elixir
+@step %Step{in: MyFirstEvent, out: MySecondEvent}
+def my_first_step(event, ctx) do
+  new_ctx = Spooks.Context.SpooksContext.put_data(:greeting, "hello world!")
+  {:ok, %MySecondEvent{}, new_ctx}
+end
+
+@step %Step{in: MySecondEvent, out: MyThirdEvent}
+def my_second_step(event, ctx) do
+  custom_greeting = Spooks.Context.SpooksContext.get_data(:greeting)
+  IO.puts(custom_greeting)
+  {:ok, %MyThirdEvent{}, ctx}
+end
+```
 
 If you wish to save checkpoints after each step, pass in your repository to the workflow context.
 

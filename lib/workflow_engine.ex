@@ -1,11 +1,28 @@
 defmodule Spooks.WorkflowEngine do
+  @moduledoc """
+  The Spooks Workflow Engine is responsible for running agentic workflows.
+
+  A workflow context is also provided that contains information about how the workflow engine should run.
+  The context holds the workflow module, the repository (if using checkpoints), and an optional llm that can be used by the workflow agent steps.
+
+  There is an event that is passed to each step in the workflow. This event name is used to determine the step function that is called. 
+  The function returns a new event which determines the next step in the workflow.
+
+  ## Example
+
+      ctx = Spooks.Context.SpooksContext.new(Spooks.Sample.SampleWorkflow, nil)
+      Spooks.WorkflowEngine.run_workflow(ctx)
+  """
+
   alias Spooks.Context.SpooksContext
   alias Spooks.Event.StartEvent
-  alias Spooks.Schema.WorkflowCheckpoint
+
+  import Spooks.Schema.SpookCheckpoints
 
   require Logger
 
-  def main(repo \\ nil) do
+  @doc false
+  def sample(repo \\ nil) do
     run_workflow(
       SpooksContext.new(
         Spooks.Sample.SampleWorkflow,
@@ -14,6 +31,11 @@ defmodule Spooks.WorkflowEngine do
     )
   end
 
+  @doc """
+  Runs the agentic workflow for the given context.
+
+  IF there is a repo, it will check for a checkpoint and resume the workflow.
+  """
   def run_workflow(workflow_context) do
     Logger.info(
       "running workflow: #{workflow_context.workflow_module} with identifier: #{workflow_context.workflow_identifier}"
@@ -26,27 +48,41 @@ defmodule Spooks.WorkflowEngine do
     end
   end
 
+  @doc """
+  Starts a workflow for the given context. Ignores any existing checkpoints.
+  """
   def start_workflow(workflow_context) do
     start_event = %StartEvent{}
 
     run_step(workflow_context, start_event)
   end
 
+  @doc """
+  Resumes a workflow for the given context. Uses the last checkpoint to determine the next step.
+
+  If there is no checkpoint, it will raise an error.
+  """
   def resume_workflow(workflow_context) do
     checkpoint =
       case workflow_context.repo do
         nil ->
           raise "Cannot resume workflow without a repo"
 
-        repo ->
-          repo.get_by(WorkflowCheckpoint,
-            workflow_identifier: workflow_context.workflow_identifier
-          )
+        _repo ->
+          get_checkpoint(workflow_context)
       end
 
     run_step(checkpoint.workflow_context, checkpoint.workflow_event)
   end
 
+  @doc """
+  Runs a step in the workflow for the given context.
+
+  If the step returns an event, it will save a checkpoint and run the next step.
+  If the step returns nil, it will remove the checkpoint and end the workflow.
+
+  If the step function does not exist in the workflow module, it will raise an error.
+  """
   def run_step(workflow_context, event) do
     step_name = get_step_function_name(event)
     Logger.debug("Running step: #{step_name}")
@@ -62,11 +98,11 @@ defmodule Spooks.WorkflowEngine do
       end)
 
     if function != nil do
-      apply(workflow_module, step_name, [workflow_context, event])
+      apply(workflow_module, step_name, [event, workflow_context])
       |> case do
         {:ok, ctx, nil} ->
           remove_checkpoint(ctx)
-          IO.puts("Workflow complete!")
+          Logger.info("Workflow complete!")
           ctx
 
         {:ok, ctx, event} ->
@@ -78,69 +114,7 @@ defmodule Spooks.WorkflowEngine do
     end
   end
 
-  def get_checkpoint(workflow_context) do
-    case workflow_context.repo do
-      nil ->
-        nil
-
-      repo ->
-        repo.get_by(WorkflowCheckpoint, workflow_identifier: workflow_context.workflow_identifier)
-    end
-  end
-
-  def has_checkpoint?(workflow_context) do
-    get_checkpoint(workflow_context) != nil
-  end
-
-  def remove_checkpoint(workflow_context) do
-    workflow_context
-    |> get_checkpoint()
-    |> case do
-      nil ->
-        {:ok, nil}
-
-      checkpoint ->
-        case workflow_context.repo do
-          nil ->
-            {:ok, nil}
-
-          repo ->
-            repo.delete(checkpoint)
-        end
-    end
-  end
-
-  def save_checkpoint(workflow_context, event) do
-    case workflow_context.repo do
-      nil ->
-        {:ok, nil}
-
-      repo ->
-        workflow_context
-        |> get_checkpoint()
-        |> case do
-          nil ->
-            %WorkflowCheckpoint{}
-            |> WorkflowCheckpoint.create_changeset(%{
-              "workflow_identifier" => workflow_context.workflow_identifier,
-              "workflow_module" => Atom.to_string(workflow_context.workflow_module),
-              "workflow_context" => workflow_context,
-              "workflow_event" => event
-            })
-            |> repo.insert()
-
-          checkpoint ->
-            checkpoint
-            |> WorkflowCheckpoint.update_changeset(%{
-              "workflow_context" => workflow_context,
-              "workflow_event" => event
-            })
-            |> repo.update()
-        end
-    end
-  end
-
-  def get_event_name(event) do
+  defp get_event_name(event) do
     event.__struct__
     |> Atom.to_string()
     |> String.split(".")
@@ -149,10 +123,13 @@ defmodule Spooks.WorkflowEngine do
     |> String.trim("_event")
   end
 
-  def get_step_name(event_name) do
+  defp get_step_name(event_name) do
     "#{event_name}_step" |> String.to_atom()
   end
 
+  @doc """
+  Gets the name of the step function for the given event.
+  """
   def get_step_function_name(event) do
     event
     |> get_event_name()

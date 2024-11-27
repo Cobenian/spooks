@@ -7,6 +7,9 @@ defmodule Spooks.Context.SpooksContext do
             checkpoint_timeout_in_minutes: nil,
             assigns: %{}
 
+  @doc """
+  Creates a new context struct, prefer this over initizializing the struct directly.
+  """
   def new(workflow_module, repo, llm \\ nil) do
     %__MODULE__{
       workflow_identifier: Ecto.UUID.generate(),
@@ -16,14 +19,20 @@ defmodule Spooks.Context.SpooksContext do
     }
   end
 
-  def add_data(%__MODULE__{} = context, keys, value) when is_list(keys) do
+  @doc """
+  Function for putting your custom data into the context.
+  """
+  def put_data(%__MODULE__{} = context, keys, value) when is_list(keys) do
     put_in(context.assigns, keys, value)
   end
 
-  def add_data(%__MODULE__{} = context, key, value) do
-    add_data(context.assigns, [key], value)
+  def put_data(%__MODULE__{} = context, key, value) do
+    put_data(context.assigns, [key], value)
   end
 
+  @doc """
+  Function for getting your custom data from the context.
+  """
   def get_data(%__MODULE__{} = context, keys) when is_list(keys) do
     get_in(context.assigns, keys)
   end

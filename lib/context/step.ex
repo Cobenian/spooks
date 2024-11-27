@@ -1,3 +1,3 @@
 defmodule Spooks.Context.Step do
-  defstruct outputs: []
+  defstruct in: nil, out: nil
 end

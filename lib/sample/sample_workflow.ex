@@ -1,48 +1,47 @@
-# defmodule Spooks.Sample.SampleWorkflow do
-#   use Spooks.Workflow
+defmodule Spooks.Sample.SampleWorkflow do
+  use Spooks.Workflow
 
-#   alias Spooks.Sample.{StepOneEvent, StepTwoEvent, HumanInputEvent, StepThreeEvent, StepFourEvent}
+  alias Spooks.Sample.{StepOneEvent, StepTwoEvent, HumanInputEvent, StepThreeEvent, StepFourEvent}
 
-#   @step %Step{outputs: [StepOneEvent]}
-#   def start_workflow(%StartEvent{} = _start_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Hello, world!"
-#     {:ok, %StepOneEvent{}}
-#   end
+  @step %Step{in: StartEvent, out: StepOneEvent}
+  def start_step(%SpooksContext{} = ctx, %StartEvent{} = start_event) do
+    IO.puts("Hello, world! #{inspect(start_event)}")
+    {:ok, ctx, %StepOneEvent{}}
+  end
 
-#   @step %Step{outputs: [StepTwoEvent]}
-#   def step_one(%StepOneEvent{} = _step_one_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Step one!"
-#     {:ok, %StepTwoEvent{}}
-#   end
+  @step %Step{in: StepOneEvent, out: StepTwoEvent}
+  def step_one_step(%SpooksContext{} = ctx, %StepOneEvent{} = step_one_event) do
+    IO.puts("Step one! #{inspect(step_one_event)}")
+    {:ok, ctx, %StepTwoEvent{}}
+  end
 
-#   @step %Step{outputs: [HumanInputEvent]}
-#   def step_two(%StepTwoEvent{} = _step_two_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Step two!"
-#     {:ok, %HumanInputEvent{}}
-#   end
+  @step %Step{in: StepTwoEvent, out: HumanInputEvent}
+  def step_two_step(%SpooksContext{} = ctx, %StepTwoEvent{} = step_two_event) do
+    IO.puts("Step two! #{inspect(step_two_event)}")
+    {:ok, ctx, %HumanInputEvent{}}
+  end
 
-#   @step %Step{outputs: [StepThreeEvent]}
-#   def human_input(%HumanInputEvent{} = _human_input_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Human input!"
-#     {:ok, %StepThreeEvent{}}
-#   end
+  @step %Step{in: HumanInputEvent, out: StepThreeEvent}
+  def human_input_step(%SpooksContext{} = ctx, %HumanInputEvent{} = human_input_event) do
+    IO.puts("Human input! #{inspect(human_input_event)}")
+    {:ok, ctx, %StepThreeEvent{}}
+  end
 
-#   @step %Step{outputs: [StepFourEvent, EndEvent]}
-#   def step_three(%StepThreeEvent{} = _step_three_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Step three!"
-#     {:ok, %EndEvent{}}
-#   end
+  @step %Step{in: StepThreeEvent, out: [StepFourEvent, EndEvent]}
+  def step_three_step(%SpooksContext{} = ctx, %StepThreeEvent{} = step_three_event) do
+    IO.puts("Step three! #{inspect(step_three_event)}")
+    {:ok, ctx, %EndEvent{}}
+  end
 
-#   @step %Step{outputs: [EndEvent]}
-#   def step_four(%StepFourEvent{} = _step_four_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Step four!"
-#     {:ok, %EndEvent{}}
-#   end
+  @step %Step{in: StepFourEvent, out: EndEvent}
+  def step_four_step(%SpooksContext{} = ctx, %StepFourEvent{} = step_four_event) do
+    IO.puts("Step four! #{inspect(step_four_event)}")
+    {:ok, ctx, %EndEvent{}}
+  end
 
-#   @step %Step{outputs: []}
-#   def end_workflow(%EndEvent{} = _end_event, %SpooksContext{} = _ctx) do
-#     IO.puts "Goodbye, world!"
-#     {:ok, nil}
-#   end
-
-# end
+  @step %Step{in: EndEvent, out: nil}
+  def end_step(%SpooksContext{} = ctx, %EndEvent{} = end_event) do
+    IO.puts("Goodbye, world! #{inspect(end_event)}")
+    {:ok, ctx, nil}
+  end
+end

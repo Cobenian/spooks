@@ -104,6 +104,6 @@ defmodule Spooks.SpooksMermaidDiagrams do
   end
 
   defp is_start_event(step) do
-    step.in == Spooks.Events.StartEvent
+    step.in == Spooks.Event.StartEvent
   end
 end

@@ -42,6 +42,23 @@ def deps do
 end
 ```
 
+### Run agents in a supervision tree
+
+In your `application.ex` file add an agent runner for each agent:
+
+```elixir 
+Supervisor.child_spec(
+  {Spooks.SpooksAgentRunner,
+    repo: MyApp.Repo,
+    check_time_in_minutes: 1,
+    workflow_module_name: MyApp.Agent.MyWorkflow,
+    llm: MyApp.MyLLMClient,
+    checkpoints_enabled: false
+  },
+  id: make_ref()
+)
+```
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/spooks>.
@@ -147,3 +164,5 @@ workflow_context = Spooks.Context.SpooksContext.new(workflow, nil)
 
 Spooks.WorkflowEngine.run_workflow(workflow_context)
 ```
+
+

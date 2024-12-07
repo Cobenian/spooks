@@ -17,7 +17,7 @@ defmodule Spooks.Context.SpooksContext do
       workflow_module: workflow_module,
       repo: repo,
       llm: llm,
-      checkpoints_enabled: checkpoints_enabled
+      checkpoints_enabled: checkpoints_enabled == true
     }
   end
 

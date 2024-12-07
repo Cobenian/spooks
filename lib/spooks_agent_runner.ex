@@ -22,19 +22,20 @@ defmodule Spooks.SpooksAgentRunner do
       opts[:workflow_module_name],
       opts[:repo],
       opts[:llm],
-      opts[:check_time_in_minutes]
+      opts[:check_time_in_minutes],
+      opts[:checkpoints_enabled]
     ])
   end
 
   @doc """
   Checks for jobs that need to be killed ON THIS NODE and tries to kill them.
   """
-  def run(workflow_module_name, repo, llm, check_time_in_minutes) do
+  def run(workflow_module_name, repo, llm, check_time_in_minutes, checkpoints_enabled) do
     Logger.info("init called for SpooksAgentsRunner #{inspect(check_time_in_minutes)}")
     minutes = check_time_in_minutes || 60
     Process.sleep(1000 * 60 * minutes)
 
-    ctx = SpooksContext.new(workflow_module_name, repo, llm)
+    ctx = SpooksContext.new(workflow_module_name, repo, llm, checkpoints_enabled)
     WorkflowEngine.run_workflow(ctx)
   end
 end

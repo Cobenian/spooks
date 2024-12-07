@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.3 (2024-12-07) 
+
+Adding supervision tree example to README
+
 ## v0.1.2 (2024-12-07) 
 
 Adding code to generate text for a mermaid diagram of a workflow.

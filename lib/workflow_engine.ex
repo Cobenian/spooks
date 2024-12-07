@@ -3,9 +3,9 @@ defmodule Spooks.WorkflowEngine do
   The Spooks Workflow Engine is responsible for running agentic workflows.
 
   A workflow context is also provided that contains information about how the workflow engine should run.
-  The context holds the workflow module, the repository (if using checkpoints), and an optional llm that can be used by the workflow agent steps.
+  The context holds the workflow module, the repository (required if using checkpoints), and an optional llm that can be used by the workflow agent steps.
 
-  There is an event that is passed to each step in the workflow. This event name is used to determine the step function that is called. 
+  There is an event that is passed to each step in the workflow. This event name is used to determine the step function that is called.
   The function returns a new event which determines the next step in the workflow.
 
   ## Example
@@ -41,8 +41,12 @@ defmodule Spooks.WorkflowEngine do
       "running workflow: #{workflow_context.workflow_module} with identifier: #{workflow_context.workflow_identifier}"
     )
 
-    if SpookCheckpoints.has_checkpoint?(workflow_context) do
-      resume_workflow(workflow_context)
+    if SpookCheckpoints.checkpoints_enabled?(workflow_context) do
+      if SpookCheckpoints.has_checkpoint?(workflow_context) do
+        resume_workflow(workflow_context)
+      else
+        start_workflow(workflow_context)
+      end
     else
       start_workflow(workflow_context)
     end
@@ -103,12 +107,18 @@ defmodule Spooks.WorkflowEngine do
       apply(workflow_module, step_name, [event, workflow_context])
       |> case do
         {:ok, ctx, nil} ->
-          SpookCheckpoints.remove_checkpoint(ctx)
+          if SpookCheckpoints.checkpoints_enabled?(ctx) do
+            SpookCheckpoints.remove_checkpoint(ctx)
+          end
+
           Logger.info("Workflow complete!")
           ctx
 
         {:ok, ctx, event} ->
-          SpookCheckpoints.save_checkpoint(ctx, event)
+          if SpookCheckpoints.checkpoints_enabled?(ctx) do
+            SpookCheckpoints.save_checkpoint(ctx, event)
+          end
+
           run_step(ctx, event)
       end
     else

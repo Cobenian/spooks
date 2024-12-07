@@ -2,6 +2,19 @@ defmodule Spooks.Checkpoint.SpookCheckpoints do
   alias Spooks.Schema.WorkflowCheckpoint
   alias Spooks.Context.SpooksContext
 
+  @moduledoc """
+  Logic for handling checkpoints (saving and retrieving the state of agent workflows) in Spooks.
+
+  Right now Ecto is the only supported repository for checkpoints.
+  """
+
+  @doc """
+  Checks if checkpoints are enabled for the given context.
+  """
+  def checkpoints_enabled?(%SpooksContext{} = workflow_context) do
+    workflow_context.checkpoints_enabled == true
+  end
+
   @doc """
   After retrieving a checkpoint from the database we must convert its data back into a struct.
   """

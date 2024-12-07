@@ -5,17 +5,19 @@ defmodule Spooks.Context.SpooksContext do
             repo: nil,
             llm: nil,
             checkpoint_timeout_in_minutes: nil,
+            checkpoints_enabled: false,
             assigns: %{}
 
   @doc """
   Creates a new context struct, prefer this over initizializing the struct directly.
   """
-  def new(workflow_module, repo, llm \\ nil) do
+  def new(workflow_module, repo, llm \\ nil, checkpoints_enabled \\ false) do
     %__MODULE__{
       workflow_identifier: Ecto.UUID.generate(),
       workflow_module: workflow_module,
       repo: repo,
-      llm: llm
+      llm: llm,
+      checkpoints_enabled: checkpoints_enabled
     }
   end
 

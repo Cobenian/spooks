@@ -96,7 +96,7 @@ defmodule Spooks.SpooksMermaidDiagrams do
       text <>
         """
 
-            classDef aistage fill:pink,color:#fff,stroke-width:4px,stroke:black
+            classDef aistage fill:orange,color:#fff,stroke-width:3px,stroke:black
         """
 
     text

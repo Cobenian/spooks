@@ -66,30 +66,40 @@ defmodule Spooks.SpooksMermaidDiagrams do
           direction LR
       """
 
-    Enum.reduce(steps, text, fn step, acc ->
-      new_text =
-        if is_start_event(step) do
-          """
-            [*] --> #{mermaid_name(step.in)}
-            #{mermaid_name(step.in)} --> #{mermaid_name(step.out)}
-          """
-        else
-          if is_list(step.out) do
-            Enum.reduce(step.out, "", fn out, acc ->
-              acc <>
-                """
-                  #{mermaid_name(step.in)} --> #{mermaid_name(out)}
-                """
-            end)
+    text =
+      Enum.reduce(steps, text, fn step, acc ->
+        new_text =
+          if is_start_event(step) do
+            """
+                [*] --> #{mermaid_name(step.in)}
+                #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(step.out)}
+            """
           else
-            """
-              #{mermaid_name(step.in)} --> #{mermaid_name(step.out)}
-            """
+            if is_list(step.out) do
+              Enum.reduce(step.out, "", fn out, acc ->
+                acc <>
+                  """
+                      #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(out)}
+                  """
+              end)
+            else
+              """
+                  #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(step.out)}
+              """
+            end
           end
-        end
 
-      acc <> new_text
-    end)
+        acc <> new_text
+      end)
+
+    text =
+      text <>
+        """
+
+            classDef aistage fill:pink,color:#fff,stroke-width:4px,stroke:black
+        """
+
+    text
   end
 
   defp mermaid_name(nil) do
@@ -101,6 +111,20 @@ defmodule Spooks.SpooksMermaidDiagrams do
     |> Atom.to_string()
     |> String.split(".")
     |> List.last()
+  end
+
+  defp mermaid_name(module, true) do
+    name =
+      module
+      |> Atom.to_string()
+      |> String.split(".")
+      |> List.last()
+
+    "#{name}:::aistage"
+  end
+
+  defp mermaid_name(module, _) do
+    mermaid_name(module)
   end
 
   defp is_start_event(step) do

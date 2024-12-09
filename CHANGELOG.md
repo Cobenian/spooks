@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.4 (2024-12-09) 
+
+Adding %Step{ai: true} to highlight AI steps in the workflow diagrams
+
 ## v0.1.3 (2024-12-07) 
 
 Adding supervision tree example to README

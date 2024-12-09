@@ -29,7 +29,7 @@ defmodule Spooks.Sample.SampleWorkflow do
     {:ok, ctx, %StepThreeEvent{}}
   end
 
-  @step %Step{in: StepThreeEvent, out: [StepFourEvent, EndEvent]}
+  @step %Step{in: StepThreeEvent, out: [StepFourEvent, EndEvent], ai: true}
   def step_three_step(%StepThreeEvent{} = step_three_event, %SpooksContext{} = ctx) do
     Logger.info("Step three! #{inspect(step_three_event)}")
     {:ok, ctx, %EndEvent{}}

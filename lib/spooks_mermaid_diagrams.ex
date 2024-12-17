@@ -68,7 +68,7 @@ defmodule Spooks.SpooksMermaidDiagrams do
 
     text =
       Enum.reduce(steps, text, fn step, acc ->
-        new_text =
+        start_text =
           if is_start_event(step) do
             """
                 [*] --> #{mermaid_name(step.in)}
@@ -78,18 +78,19 @@ defmodule Spooks.SpooksMermaidDiagrams do
           end
 
         new_text =
-          if is_list(step.out) do
-            Enum.reduce(step.out, new_text, fn out, acc ->
-              acc <>
-                """
-                    #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(out)}
-                """
-            end)
-          else
-            """
-                #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(step.out)}
-            """
-          end
+          start_text <>
+            if is_list(step.out) do
+              Enum.reduce(step.out, "", fn out, acc ->
+                acc <>
+                  """
+                      #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(out)}
+                  """
+              end)
+            else
+              """
+                  #{mermaid_name(step.in, step.ai)} --> #{mermaid_name(step.out)}
+              """
+            end
 
         acc <> new_text
       end)

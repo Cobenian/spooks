@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.5 (2024-12-16)
+
+Fixing bug in rendering mermaid diagrams of workflows where the start has an out that is an array.
+
 ## v0.1.4 (2024-12-09) 
 
 Adding %Step{ai: true} to highlight AI steps in the workflow diagrams
